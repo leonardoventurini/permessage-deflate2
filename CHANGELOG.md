@@ -1,3 +1,7 @@
+### 0.1.8 / 2024-11-09
+
+- Add `threshold` option to control when compression is applied
+
 ### 0.1.7 / 2019-06-10
 
 - Use the `Buffer.alloc()` and `Buffer.from()` functions instead of the unsafe

@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  - pull_request
+
+jobs:
+  test:
+    name: Node.js v${{ matrix.node }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22', '23']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test 

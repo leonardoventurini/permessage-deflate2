@@ -348,4 +348,57 @@ test.describe("ServerSession", function() { with(this) {
       processOutgoingMessage()
     }})
   }})
+
+  describe("with threshold", function() { with(this) {
+    define("options", { threshold: 100 })
+    
+    it("does not compress messages smaller than threshold", function() { with(this) {
+      this.message = { data: Buffer.alloc(50).fill("x"), rsv1: true }
+      response()
+      expect(zlib, "createDeflateRaw").exactly(0)
+      processOutgoingMessage()
+    }})
+
+    it("compresses messages larger than threshold", function() { with(this) {
+      this.message = { data: Buffer.alloc(150).fill("x"), rsv1: true }
+      response()
+      expect(zlib, "createDeflateRaw").given({ windowBits: 15, level: level, memLevel: memLevel, strategy: strategy }).returns(deflate)
+      processOutgoingMessage()
+    }})
+
+    it("sets rsv1 to false when skipping compression", function() { with(this) {
+      this.message = { data: Buffer.alloc(50).fill("x"), rsv1: true }
+      response()
+      processOutgoingMessage(function(error, message) {
+        assertEqual(false, message.rsv1)
+      })
+    }})
+
+    it("maintains rsv1 when compressing", function() { with(this) {
+      this.message = { data: Buffer.alloc(150).fill("x"), rsv1: true }
+      response()
+      stub(zlib, "createDeflateRaw").returns(deflate)
+      processOutgoingMessage(function(error, message) {
+        assertEqual(true, message.rsv1)
+      })
+    }})
+
+    it("handles threshold of 0 (always compress)", function() { with(this) {
+      this.ext = PermessageDeflate.configure({ threshold: 0 })
+      this.session = ext.configure({ zlib: zlib }).createServerSession([offer])
+      this.message = { data: Buffer.alloc(1).fill("x"), rsv1: true }
+      response()
+      expect(zlib, "createDeflateRaw").given({ windowBits: 15, level: level, memLevel: memLevel, strategy: strategy }).returns(deflate)
+      processOutgoingMessage()
+    }})
+
+    it("handles undefined threshold (always compress)", function() { with(this) {
+      this.ext = PermessageDeflate.configure({})
+      this.session = ext.configure({ zlib: zlib }).createServerSession([offer])
+      this.message = { data: Buffer.alloc(1).fill("x"), rsv1: true }
+      response()
+      expect(zlib, "createDeflateRaw").given({ windowBits: 15, level: level, memLevel: memLevel, strategy: strategy }).returns(deflate)
+      processOutgoingMessage()
+    }})
+  }})
 }})

@@ -8,7 +8,7 @@ WebSocket protocol extension as a plugin for
 ## Installation
 
 ```
-$ npm install permessage-deflate
+$ npm install permessage-deflate2
 ```
 
 ## Usage
@@ -32,7 +32,8 @@ var Extensions = require('websocket-extensions'),
 
 deflate = deflate.configure({
   level: zlib.Z_BEST_COMPRESSION,
-  maxWindowBits: 13
+  maxWindowBits: 13,
+  threshold: 100 // optional, defaults to 0 (always compress)
 });
 
 var exts = new Extensions();
@@ -45,6 +46,7 @@ the peer, and those that are negotiated as part of the protocol. The settings
 only affecting the compressor are described fully in the [zlib
 documentation](http://nodejs.org/api/zlib.html#zlib_options):
 
+- `threshold`: sets the minimum size of messages to be compressed, defaults to 0
 - `level`: sets the compression level, can be an integer from `0` to `9`, or one
   of the constants `zlib.Z_NO_COMPRESSION`, `zlib.Z_BEST_SPEED`,
   `zlib.Z_BEST_COMPRESSION`, or `zlib.Z_DEFAULT_COMPRESSION`
